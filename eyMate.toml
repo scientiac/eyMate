@@ -1,0 +1,10 @@
+[video]
+mode = "IR"
+device_rgb = 0
+device_ir = 2
+
+[detection]
+min_similarity_ir = 0.8
+min_similarity_rgb = 0.8
+min_brightness_ir = 0.8
+min_brightness_rgb = 0.8
