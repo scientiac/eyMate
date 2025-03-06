@@ -1,20 +1,9 @@
 use anyhow::{Result, *};
-use clap::Parser;
+use clap::{Command, arg, value_parser};
 use opencv::prelude::*;
 use opencv::{core, highgui, imgcodecs, imgproc, videoio};
 use std::{fs, path::Path, thread::sleep, time::Duration};
 use tch::{CModule, Device, Kind, Tensor};
-
-#[derive(Parser, Debug)]
-#[command(version, about, long_about = None)]
-struct Args {
-    /// User to be looged in
-    #[arg(short, long, default_value_t = String::from(""))]
-    user: String,
-    /// Add a new user
-    #[arg(short, long, default_value_t = String::from(""))]
-    add: String,
-}
 
 fn cosine_similarity(a: &Tensor, b: &Tensor) -> f64 {
     let a_flat = a.view([-1]); // Flatten to 1D
@@ -135,16 +124,33 @@ fn cmd_test(user: &str) -> Result<()> {
     Ok(())
 }
 
-fn main() -> Result<()> {
-    let args = Args::parse();
+fn main() {
+    let matches = Command::new(option_env!("CARGO_PKG_NAME").unwrap())
+        .about(option_env!("CARGO_PKG_DESCRIPTION").unwrap())
+        .version(option_env!("CARGO_PKG_VERSION"))
+        .subcommand_required(true)
+        .arg_required_else_help(true)
+        .subcommand(
+            Command::new("add")
+                .about("Add user to database.")
+                .arg(arg!(<USER> "Affected user").value_parser(value_parser!(String)))
+                .arg_required_else_help(true),
+        )
+        .subcommand(
+            Command::new("test")
+                .about("Test user login.")
+                .arg(arg!(<USER> "Affected user").value_parser(value_parser!(String)))
+                .arg_required_else_help(true),
+        )
+        .get_matches();
 
-    if !args.add.is_empty() {
-        cmd_add(&args.add)?;
-    } else if !args.user.is_empty() {
-        cmd_test(&args.user)?;
-    } else {
-        println!("Use -h for help");
+    let err = match matches.subcommand() {
+        Some(("add", add_matches)) => cmd_add(add_matches.get_one::<String>("USER").unwrap()),
+        Some(("test", add_matches)) => cmd_test(add_matches.get_one::<String>("USER").unwrap()),
+        _ => unreachable!(),
+    };
+
+    if let Err(err) = err {
+        println!("Command failed with:\n{}", err);
     }
-
-    Ok(())
 }
