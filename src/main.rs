@@ -77,7 +77,7 @@ fn main() {
 
     let username = args.user.as_str();
 
-    if args.add != "" {
+    if !args.add.is_empty() {
         println!("Adding new user: {}", args.add);
         let new_user = args.add.as_str();
         cam_rgb.read(&mut frame_rgb).unwrap();
