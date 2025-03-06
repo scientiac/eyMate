@@ -8,6 +8,7 @@ You need to have following installed:
 
 - pytorch 
 - torchvision
+- python-gobject
 - facenet (git clone into project root)
 
 ## How to build
