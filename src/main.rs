@@ -1,9 +1,8 @@
+use clap::Parser;
+use opencv::{core, highgui, imgcodecs, imgproc, prelude::*, videoio};
 use std::fs;
 use std::path::Path;
-use opencv::{core, imgcodecs, imgproc, prelude::*, videoio, highgui};
-use tch::{CModule, Tensor, Kind, Device};
-use clap::Parser;
-
+use tch::{CModule, Device, Kind, Tensor};
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
@@ -13,19 +12,14 @@ struct Args {
     user: String,
     /// Add a new user
     #[arg(short, long, default_value_t = String::from(""))]
-    add: String
+    add: String,
 }
-
-
-
-
-
 
 fn preprocess_image(image: &Mat) -> Tensor {
     let size = core::Size::new(160, 160);
     let mut resized = Mat::default();
     imgproc::resize(image, &mut resized, size, 0.0, 0.0, imgproc::INTER_LINEAR).unwrap();
-    
+
     let data = resized.data_bytes().unwrap();
     Tensor::from_data_size(data, &[1, 3, 160, 160], Kind::Uint8)
         .to_dtype(Kind::Float, false, true)
@@ -34,12 +28,19 @@ fn preprocess_image(image: &Mat) -> Tensor {
 
 fn preprocess_ir_image(image: &Mat) -> Tensor {
     let mut gray = Mat::default();
-    imgproc::cvt_color(image, &mut gray, imgproc::COLOR_BGR2GRAY, 0, opencv::core::AlgorithmHint::ALGO_HINT_DEFAULT).unwrap();
+    imgproc::cvt_color(
+        image,
+        &mut gray,
+        imgproc::COLOR_BGR2GRAY,
+        0,
+        opencv::core::AlgorithmHint::ALGO_HINT_DEFAULT,
+    )
+    .unwrap();
 
     let size = core::Size::new(160, 160);
     let mut resized = Mat::default();
     imgproc::resize(&gray, &mut resized, size, 0.0, 0.0, imgproc::INTER_LINEAR).unwrap();
-    
+
     let data = resized.data_bytes().unwrap();
     Tensor::from_data_size(data, &[1, 1, 160, 160], Kind::Uint8)
         .to_dtype(Kind::Float, false, true)
@@ -68,7 +69,7 @@ fn main() {
 
     let mut cam_rgb = videoio::VideoCapture::new(0, videoio::CAP_ANY).unwrap();
     let mut cam_ir = videoio::VideoCapture::new(2, videoio::CAP_ANY).unwrap();
-    
+
     let mut frame_rgb = Mat::default();
     let mut frame_ir = Mat::default();
 
@@ -82,7 +83,9 @@ fn main() {
         cam_rgb.read(&mut frame_rgb).unwrap();
         cam_ir.read(&mut frame_ir).unwrap();
         save_images(new_user, &frame_rgb, &frame_ir);
-        if !Path::new(&format!("users/{}/rgb.jpg", new_user)).exists() || !Path::new(&format!("users/{}/ir.jpg", new_user)).exists() {  
+        if !Path::new(&format!("users/{}/rgb.jpg", new_user)).exists()
+            || !Path::new(&format!("users/{}/ir.jpg", new_user)).exists()
+        {
             println!("Failed to save images. Please try again.");
             return;
         }
@@ -116,10 +119,10 @@ fn main() {
 
         let input_rgb_tensor = preprocess_image(&frame_rgb);
         let input_ir_tensor = preprocess_ir_image(&frame_ir);
-        
+
         let input_rgb_embedding = model.forward_ts(&[input_rgb_tensor]).unwrap();
         let input_ir_embedding = model.forward_ts(&[input_ir_tensor]).unwrap();
-        
+
         let input_embedding = combine_embeddings(&input_rgb_embedding, &input_ir_embedding);
 
         let dot_product = reference_embedding.dot(&input_embedding).double_value(&[]);
