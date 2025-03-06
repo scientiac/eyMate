@@ -54,7 +54,43 @@ fn save_images(username: &str, rgb: &Mat, ir: &Mat) -> Result<()> {
     Ok(())
 }
 
-fn main() -> Result<()> {
+fn cmd_add(user: &str) -> Result<()> {
+    let mut cam_rgb = videoio::VideoCapture::new(0, videoio::CAP_ANY)?;
+    let mut cam_ir = videoio::VideoCapture::new(2, videoio::CAP_ANY)?;
+
+    let mut frame_rgb = Mat::default();
+    let mut frame_ir = Mat::default();
+
+    println!("Adding new user: {}", user);
+
+    cam_ir.read(&mut frame_ir)?;
+
+    cam_rgb.grab()?;
+
+    sleep(Duration::from_secs(2));
+
+    cam_rgb.read(&mut frame_rgb)?;
+
+    save_images(user, &frame_rgb, &frame_ir)?;
+    if !Path::new(&format!("users/{}/rgb.jpg", user)).exists()
+        || !Path::new(&format!("users/{}/ir.jpg", user)).exists()
+    {
+        return Err(anyhow!("Failed to save images. Please try again."));
+    }
+    println!("Images saved for user: {}", user);
+
+    Ok(())
+}
+
+fn cmd_test(user: &str) -> Result<()> {
+    let user_dir = format!("users/{}/", user);
+    let rgb_path = format!("{}rgb.jpg", user_dir);
+    let ir_path = format!("{}ir.jpg", user_dir);
+
+    if !Path::new(&rgb_path).exists() || !Path::new(&ir_path).exists() {
+        return Err(anyhow!("User not found. Please register first."));
+    }
+
     let model = CModule::load("./vggface2.pt").expect("Failed to load model");
 
     let mut cam_rgb = videoio::VideoCapture::new(0, videoio::CAP_ANY)?;
@@ -62,41 +98,6 @@ fn main() -> Result<()> {
 
     let mut frame_rgb = Mat::default();
     let mut frame_ir = Mat::default();
-
-    let args = Args::parse();
-
-    let username = args.user.as_str();
-
-    if !args.add.is_empty() {
-        let new_user = args.add.as_str();
-
-        println!("Adding new user: {}", args.add);
-
-        cam_ir.read(&mut frame_ir)?;
-
-        cam_rgb.grab()?;
-
-        sleep(Duration::from_secs(2));
-
-        cam_rgb.read(&mut frame_rgb)?;
-
-        save_images(new_user, &frame_rgb, &frame_ir)?;
-        if !Path::new(&format!("users/{}/rgb.jpg", new_user)).exists()
-            || !Path::new(&format!("users/{}/ir.jpg", new_user)).exists()
-        {
-            return Err(anyhow!("Failed to save images. Please try again."));
-        }
-        println!("Images saved for user: {}", new_user);
-        return Ok(());
-    }
-
-    let user_dir = format!("users/{}/", username);
-    let rgb_path = format!("{}rgb.jpg", user_dir);
-    let ir_path = format!("{}ir.jpg", user_dir);
-
-    if !Path::new(&rgb_path).exists() || !Path::new(&ir_path).exists() {
-        return Err(anyhow!("User not found. Please register first."));
-    }
 
     let reference_rgb = imgcodecs::imread(&rgb_path, imgcodecs::IMREAD_COLOR)?;
     let reference_ir = imgcodecs::imread(&ir_path, imgcodecs::IMREAD_COLOR)?;
@@ -115,9 +116,6 @@ fn main() -> Result<()> {
         let input_ir_tensor = preprocess_image(&frame_ir)?;
 
         let input_rgb_embedding = model.forward_ts(&[input_rgb_tensor])?;
-
-        println!("TENSOR: {:?}", input_rgb_embedding);
-
         let input_ir_embedding = model.forward_ts(&[input_ir_tensor])?;
 
         let similarity = cosine_similarity(&reference_ir_embedding, &input_ir_embedding);
@@ -133,6 +131,19 @@ fn main() -> Result<()> {
 
         highgui::imshow("RGB Camera", &frame_rgb)?;
         highgui::imshow("IR Camera", &frame_ir)?;
+    }
+    Ok(())
+}
+
+fn main() -> Result<()> {
+    let args = Args::parse();
+
+    if !args.add.is_empty() {
+        cmd_add(&args.add)?;
+    } else if !args.user.is_empty() {
+        cmd_test(&args.user)?;
+    } else {
+        println!("Use -h for help");
     }
 
     Ok(())
