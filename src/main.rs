@@ -1,18 +1,27 @@
-use anyhow::Result;
+use anyhow::{Result, *};
 use clap::{Command, arg, value_parser};
+use config::Config;
 use figment::{
     Figment,
     providers::{Format, Toml},
 };
+use paths::{create_config_dir, create_data_dir, get_config_file};
 
-mod detection;
 mod config;
-
+mod detection;
+mod paths;
 
 fn main() -> Result<()> {
-    let config: config::Config = Figment::new().merge(Toml::file("eyMate.toml")).extract()?;
+    // if whoami::username() != "root" {
+    //     return Err(anyhow!("You need to run eyMate with admin rights!"));
+    // }
 
-    println!("{:?}", config);
+    create_config_dir()?;
+    create_data_dir()?;
+
+    let config_file = get_config_file()?;
+
+    let config: Config = Figment::new().merge(Toml::file(config_file)).extract()?;
 
     let matches = Command::new(option_env!("CARGO_PKG_NAME").unwrap())
         .about(option_env!("CARGO_PKG_DESCRIPTION").unwrap())

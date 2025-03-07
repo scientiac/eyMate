@@ -1,11 +1,23 @@
 use anyhow::{Result, *};
 use opencv::prelude::*;
 use opencv::{core, highgui, imgcodecs, imgproc, videoio};
-use std::thread;
-use std::{fs, path::Path, thread::sleep, time::Duration};
-use tch::{CModule, Device, Kind, Tensor};
+use std::fs;
+use std::path::PathBuf;
+use std::{path::Path, thread::sleep, time::Duration};
+use tch::{CModule, Kind, Tensor};
 
 use crate::config::*;
+use crate::paths::get_data_dir;
+
+fn get_data_file(path: &PathBuf, file: &str) -> Result<String> {
+    let path = path.join(file);
+    let path = path
+        .to_str()
+        .ok_or_else(|| anyhow!("Failed to convert path to string!"))?;
+    let path = path.to_owned();
+
+    Ok(path)
+}
 
 fn cosine_similarity(a: &Tensor, b: &Tensor) -> f64 {
     let a_flat = a.view([-1]); // Flatten to 1D
@@ -38,11 +50,11 @@ fn process_image(image: &Mat, model: &CModule) -> Result<Tensor> {
 }
 
 fn save_images(username: &str, rgb: &Mat, ir: &Mat) -> Result<()> {
-    let user_dir = format!("users/{}", username);
-    fs::create_dir_all(&user_dir)?;
+    let data_dir = get_data_dir().join(username);
+    fs::create_dir_all(&data_dir)?;
 
-    let rgb_path = format!("{}/rgb.jpg", user_dir);
-    let ir_path = format!("{}/ir.jpg", user_dir);
+    let rgb_path = get_data_file(&data_dir, "rgb.jpg")?;
+    let ir_path = get_data_file(&data_dir, "ir.jpg")?;
 
     imgcodecs::imwrite(&rgb_path, rgb, &core::Vector::new())?;
     imgcodecs::imwrite(&ir_path, ir, &core::Vector::new())?;
@@ -71,27 +83,37 @@ pub fn cmd_add(config: Config, user: &str) -> Result<()> {
     let brightness_vec = core::mean(&frame_ir, &core::no_array())?;
     let brightness = brightness_vec.iter().sum::<f64>() / brightness_vec.len() as f64;
 
+    save_images(user, &frame_rgb, &frame_ir)?;
+
     if brightness < config.detection.min_brightness_ir {
-        return Err(anyhow!("Failed ir image brightness too low"));
+        return Err(anyhow!(
+            "Failed ir image brightness too low with: {:.2}/{:.2}",
+            brightness,
+            config.detection.min_brightness_ir
+        ));
     }
 
     let brightness_vec = core::mean(&frame_rgb, &core::no_array())?;
     let brightness = brightness_vec.iter().sum::<f64>() / brightness_vec.len() as f64;
 
     if brightness < config.detection.min_brightness_rgb {
-        return Err(anyhow!("Failed ir image brightness too low"));
+        return Err(anyhow!(
+            "Failed rgb image brightness too low with: {:.2}/{:.2}",
+            brightness,
+            config.detection.min_brightness_rgb
+        ));
     }
-
-    save_images(user, &frame_rgb, &frame_ir)?;
     println!("Images saved for user: {}", user);
 
     Ok(())
 }
 
-pub fn cmd_test(config: Config, user: &str) -> Result<()> {
+pub fn cmd_test(config: Config, username: &str) -> Result<()> {
+    let data_dir = get_data_dir().join(username);
+
     let path = match &config.video.mode {
-        Modes::IR => format!("users/{}/ir.jpg", user),
-        Modes::RGB => format!("users/{}/rgb.jpg", user),
+        Modes::IR => get_data_file(&data_dir, "ir.jpg")?,
+        Modes::RGB => get_data_file(&data_dir, "rgb.jpg")?,
     };
 
     let device = match &config.video.mode {
@@ -135,7 +157,7 @@ pub fn cmd_test(config: Config, user: &str) -> Result<()> {
             brightness, similarity, min_similarity
         );
 
-        highgui::imshow("Camera", &frame)?;
+        highgui::imshow("Press <ESC> to exit!", &frame)?;
 
         if brightness < min_brightness {
             println!("Frame too dark!");
