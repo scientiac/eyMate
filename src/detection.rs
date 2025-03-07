@@ -1,6 +1,7 @@
 use anyhow::{Result, *};
 use opencv::prelude::*;
 use opencv::{core, highgui, imgcodecs, imgproc, videoio};
+use std::thread;
 use std::{fs, path::Path, thread::sleep, time::Duration};
 use tch::{CModule, Device, Kind, Tensor};
 
@@ -59,13 +60,27 @@ pub fn cmd_add(config: Config, user: &str) -> Result<()> {
 
     println!("Adding new user: {}", user);
 
-    cam_ir.read(&mut frame_ir)?;
-
+    cam_ir.grab()?;
     cam_rgb.grab()?;
 
     sleep(Duration::from_secs(2));
 
+    cam_ir.read(&mut frame_ir)?;
     cam_rgb.read(&mut frame_rgb)?;
+
+    let brightness_vec = core::mean(&frame_ir, &core::no_array())?;
+    let brightness = brightness_vec.iter().sum::<f64>() / brightness_vec.len() as f64;
+
+    if brightness < config.detection.min_brightness_ir {
+        return Err(anyhow!("Failed ir image brightness too low"));
+    }
+
+    let brightness_vec = core::mean(&frame_rgb, &core::no_array())?;
+    let brightness = brightness_vec.iter().sum::<f64>() / brightness_vec.len() as f64;
+
+    if brightness < config.detection.min_brightness_rgb {
+        return Err(anyhow!("Failed ir image brightness too low"));
+    }
 
     save_images(user, &frame_rgb, &frame_ir)?;
     println!("Images saved for user: {}", user);
@@ -109,20 +124,18 @@ pub fn cmd_test(config: Config, user: &str) -> Result<()> {
     while highgui::wait_key(1)? != 27 {
         cam.read(&mut frame)?;
 
-        let mut img = Mat::default();
-        imgproc::cvt_color_def(&frame, &mut img, imgproc::COLOR_BGR2GRAY)?;
-
-        let brightness_array = core::mean(&img, &core::no_array())?;
-        let brightness = (brightness_array[0] + brightness_array[1] + brightness_array[2]) / 3.0;
+        let brightness_vec = core::mean(&frame, &core::no_array())?;
+        let brightness = brightness_vec.iter().sum::<f64>() / brightness_vec.len() as f64;
 
         let input_embedding = process_image(&frame, &model)?;
 
         let similarity = cosine_similarity(&reference_embedding, &input_embedding);
+        println!(
+            "Similarity: {:.3} {:.3}/{:.3}",
+            brightness, similarity, min_similarity
+        );
 
-        // println!(
-        //     "Similarity: {:.3} {:.3}/{:.3}",
-        //     brightness, similarity, min_similarity
-        // );
+        highgui::imshow("Camera", &frame)?;
 
         if brightness < min_brightness {
             println!("Frame too dark!");
@@ -131,8 +144,6 @@ pub fn cmd_test(config: Config, user: &str) -> Result<()> {
         } else {
             println!("Face does not match.");
         }
-
-        highgui::imshow("Camera", &frame)?;
     }
     Ok(())
 }
