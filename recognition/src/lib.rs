@@ -188,7 +188,6 @@ pub fn cmd_test(config: Config, username: &str) -> Result<()> {
 
 pub fn cmd_auth(username: &str) -> Result<bool> {
     let config_file = get_config_file()?;
-
     let config: Config = Figment::new().merge(Toml::file(config_file)).extract()?;
 
     let path = match &config.video.mode {
