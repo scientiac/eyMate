@@ -33,7 +33,7 @@ pub fn create_data_dir() -> Result<PathBuf> {
     if !data_path.exists() {
         fs::create_dir_all(&data_path)?;
     }
-    fs::set_permissions(&data_path, fs::Permissions::from_mode(0o700))?;
+    fs::set_permissions(&data_path, fs::Permissions::from_mode(0o755))?;
 
     Ok(data_path)
 }
