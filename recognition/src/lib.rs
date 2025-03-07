@@ -1,15 +1,19 @@
 use anyhow::{Result, *};
+use figment::Figment;
+use figment::providers::{Format, Toml};
 use opencv::prelude::*;
 use opencv::{core, highgui, imgcodecs, imgproc, videoio};
 use std::fs;
-use std::path::PathBuf;
 use std::{path::Path, thread::sleep, time::Duration};
 use tch::{CModule, Kind, Tensor};
 
 use crate::config::*;
-use crate::paths::get_data_dir;
+use crate::paths::*;
 
-fn get_data_file(path: &PathBuf, file: &str) -> Result<String> {
+pub mod config;
+pub mod paths;
+
+fn get_data_file(path: &Path, file: &str) -> Result<String> {
     let path = path.join(file);
     let path = path
         .to_str()
@@ -49,18 +53,23 @@ fn process_image(image: &Mat, model: &CModule) -> Result<Tensor> {
     Ok(embedding)
 }
 
-fn save_images(username: &str, rgb: &Mat, ir: &Mat) -> Result<()> {
-    let data_dir = get_data_dir().join(username);
+fn save_tensor(username: &str, filename: &str, tensor: &Tensor) -> Result<()> {
+    let data_dir = get_data_dir().join("users").join(username);
     fs::create_dir_all(&data_dir)?;
 
-    let rgb_path = get_data_file(&data_dir, "rgb.jpg")?;
-    let ir_path = get_data_file(&data_dir, "ir.jpg")?;
+    let path = get_data_file(&data_dir, filename)?;
 
-    imgcodecs::imwrite(&rgb_path, rgb, &core::Vector::new())?;
-    imgcodecs::imwrite(&ir_path, ir, &core::Vector::new())?;
+    tensor.save(path)?;
 
     println!("Saved images for user: {}", username);
     Ok(())
+}
+
+fn load_tensor(username: &str, filename: &str) -> Result<Tensor> {
+    let data_dir = get_data_dir().join("users").join(username);
+    let path = get_data_file(&data_dir, filename)?;
+    
+    Ok(tch::Tensor::load(path)?)
 }
 
 pub fn cmd_add(config: Config, user: &str) -> Result<()> {
@@ -72,18 +81,25 @@ pub fn cmd_add(config: Config, user: &str) -> Result<()> {
 
     println!("Adding new user: {}", user);
 
-    cam_ir.grab()?;
     cam_rgb.grab()?;
+    cam_ir.grab()?;
 
     sleep(Duration::from_secs(2));
 
     cam_ir.read(&mut frame_ir)?;
     cam_rgb.read(&mut frame_rgb)?;
 
+    let data_dir = get_data_dir();
+    let model = CModule::load(get_data_file(&data_dir, "vggface2.pt")?)?;
+
+    let embedding = process_image(&frame_rgb, &model)?;
+    save_tensor(user, "rgb.bin", &embedding)?;
+
+    let embedding = process_image(&frame_ir, &model)?;
+    save_tensor(user, "ir.bin", &embedding)?;
+
     let brightness_vec = core::mean(&frame_ir, &core::no_array())?;
     let brightness = brightness_vec.iter().sum::<f64>() / brightness_vec.len() as f64;
-
-    save_images(user, &frame_rgb, &frame_ir)?;
 
     if brightness < config.detection.min_brightness_ir {
         return Err(anyhow!(
@@ -109,11 +125,15 @@ pub fn cmd_add(config: Config, user: &str) -> Result<()> {
 }
 
 pub fn cmd_test(config: Config, username: &str) -> Result<()> {
-    let data_dir = get_data_dir().join(username);
+    let path = get_data_dir().join("users").join(username);
+
+    if !Path::new(&path).exists() {
+        return Err(anyhow!("User not found. Please register first."));
+    }
 
     let path = match &config.video.mode {
-        Modes::IR => get_data_file(&data_dir, "ir.jpg")?,
-        Modes::RGB => get_data_file(&data_dir, "rgb.jpg")?,
+        Modes::IR => "ir.bin",
+        Modes::RGB => "rgb.bin",
     };
 
     let device = match &config.video.mode {
@@ -131,17 +151,13 @@ pub fn cmd_test(config: Config, username: &str) -> Result<()> {
         Modes::RGB => config.detection.min_brightness_rgb,
     };
 
-    if !Path::new(&path).exists() {
-        return Err(anyhow!("User not found. Please register first."));
-    }
-
-    let model = CModule::load("./vggface2.pt")?;
+    let data_dir = get_data_dir();
+    let model = CModule::load(get_data_file(&data_dir, "vggface2.pt")?)?;
 
     let mut cam = videoio::VideoCapture::new(device, videoio::CAP_ANY)?;
     let mut frame = Mat::default();
 
-    let reference = imgcodecs::imread(&path, imgcodecs::IMREAD_COLOR)?;
-    let reference_embedding = process_image(&reference, &model)?;
+    let reference_embedding = load_tensor(username, path)?;
 
     while highgui::wait_key(1)? != 27 {
         cam.read(&mut frame)?;
@@ -168,4 +184,61 @@ pub fn cmd_test(config: Config, username: &str) -> Result<()> {
         }
     }
     Ok(())
+}
+
+pub fn cmd_auth(username: &str) -> Result<bool> {
+    let config_file = get_config_file()?;
+
+    let config: Config = Figment::new().merge(Toml::file(config_file)).extract()?;
+
+    let data_dir = get_data_dir().join(username);
+
+    let path = match &config.video.mode {
+        Modes::IR => get_data_file(&data_dir, "ir.jpg")?,
+        Modes::RGB => get_data_file(&data_dir, "rgb.jpg")?,
+    };
+
+    let device = match &config.video.mode {
+        Modes::IR => config.video.device_ir,
+        Modes::RGB => config.video.device_rgb,
+    };
+
+    let min_similarity = match &config.video.mode {
+        Modes::IR => config.detection.min_similarity_ir,
+        Modes::RGB => config.detection.min_similarity_rgb,
+    };
+
+    let min_brightness = match &config.video.mode {
+        Modes::IR => config.detection.min_brightness_ir,
+        Modes::RGB => config.detection.min_brightness_rgb,
+    };
+
+    let data_dir = get_data_dir();
+    let model = CModule::load(get_data_file(&data_dir, "vggface2.pt")?)?;
+
+    let mut cam = videoio::VideoCapture::new(device, videoio::CAP_ANY)?;
+    let mut frame = Mat::default();
+
+    cam.read(&mut frame)?;
+
+    let reference = imgcodecs::imread(&path, imgcodecs::IMREAD_COLOR)?;
+    let reference_embedding = process_image(&reference, &model)?;
+
+    let brightness_vec = core::mean(&frame, &core::no_array())?;
+    let brightness = brightness_vec.iter().sum::<f64>() / brightness_vec.len() as f64;
+
+    let input_embedding = process_image(&frame, &model)?;
+
+    let similarity = cosine_similarity(&reference_embedding, &input_embedding);
+
+    if brightness > min_brightness {
+        println!("Frame too dark!");
+        return Ok(false);
+    }
+    if similarity > min_similarity {
+        println!("Face does not match!");
+        return Ok(false);
+    }
+
+    Ok(true)
 }

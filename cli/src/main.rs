@@ -1,20 +1,16 @@
 use anyhow::{Result, *};
 use clap::{Command, arg, value_parser};
-use config::Config;
 use figment::{
     Figment,
     providers::{Format, Toml},
 };
-use paths::{create_config_dir, create_data_dir, get_config_file};
-
-mod config;
-mod detection;
-mod paths;
+use recognition::config::*;
+use recognition::paths::*;
 
 fn main() -> Result<()> {
-    // if whoami::username() != "root" {
-    //     return Err(anyhow!("You need to run eyMate with admin rights!"));
-    // }
+    if whoami::username() != "root" {
+        // return Err(anyhow!("You need to run eyMate with admin rights!"));
+    }
 
     create_config_dir()?;
     create_data_dir()?;
@@ -44,10 +40,10 @@ fn main() -> Result<()> {
 
     let err = match matches.subcommand() {
         Some(("add", add_matches)) => {
-            detection::cmd_add(config, add_matches.get_one::<String>("USER").unwrap())
+            recognition::cmd_add(config, add_matches.get_one::<String>("USER").unwrap())
         }
         Some(("test", test_matches)) => {
-            detection::cmd_test(config, test_matches.get_one::<String>("USER").unwrap())
+            recognition::cmd_test(config, test_matches.get_one::<String>("USER").unwrap())
         }
         _ => unreachable!(),
     };

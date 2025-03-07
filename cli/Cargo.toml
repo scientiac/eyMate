@@ -1,0 +1,13 @@
+[package]
+name = "cli"
+description = "A linux face recognition like Windows Hello or Howdy"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+whoami = "1.5.2"
+recognition = { path = "../recognition" }
+clap = "4.5.31"
+anyhow = "1.0.97"
+figment = { version = "0.10.19", features = ["toml"] }
+toml = "0.8.20"

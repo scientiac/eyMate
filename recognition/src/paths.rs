@@ -6,7 +6,7 @@ use crate::config::Config;
 // const CONFIG_PATH: &str = "/etc/eyMate/";
 // const DATA_PATH: &str = "/usr/share/eyMate/";
 const CONFIG_PATH: &str = "./config/";
-const DATA_PATH: &str = "./users/";
+const DATA_PATH: &str = ".";
 
 pub fn get_config_dir() -> PathBuf {
     PathBuf::from(CONFIG_PATH)
@@ -44,7 +44,6 @@ pub fn get_config_file() -> Result<PathBuf> {
     if !config_file.exists() {
         let default_config = Config::default();
         fs::write(&config_file, toml::to_string_pretty(&default_config)?)?;
-        println!("Created default config.");
     }
 
     Ok(config_file)
