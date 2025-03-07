@@ -15,10 +15,10 @@ fn auth(pamh: Pam) -> PamError {
 
     // println!("User: {}", user.to_str().unwrap());
 
-    let res = cmd_auth(user.to_str().unwrap());
+    let res = cmd_auth(user.to_str().unwrap_or("_"));
 
     if let Err(err) = res {
-        println!("{}", err);
+        // println!("{}", err);
         return PamError::AUTH_ERR;
     } else if let Ok(worked) = res {
         if worked {
@@ -35,23 +35,29 @@ impl PamServiceModule for PamFace {
     }
 
     fn authenticate(pamh: Pam, _flags: PamFlags, _args: Vec<String>) -> PamError {
+        let _ = match pamh.get_authtok(None) {
+            Ok(Some(u)) => u,
+            Ok(None) => return PamError::AUTH_ERR,
+            Err(e) => return e,
+        };
+
         auth(pamh)
     }
 
     fn close_session(_pamh: Pam, _flags: PamFlags, _args: Vec<String>) -> PamError {
-        PamError::IGNORE
+        PamError::SUCCESS
     }
 
     fn setcred(_: Pam, _: PamFlags, _: Vec<String>) -> PamError {
-        PamError::IGNORE
+        PamError::SUCCESS
     }
 
     fn acct_mgmt(_: Pam, _: PamFlags, _: Vec<String>) -> PamError {
-        PamError::IGNORE
+        PamError::SUCCESS
     }
 
     fn chauthtok(_: Pam, _: PamFlags, _: Vec<String>) -> PamError {
-        PamError::IGNORE
+        PamError::SUCCESS
     }
 }
 

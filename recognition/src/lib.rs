@@ -3,7 +3,7 @@ use figment::Figment;
 use figment::providers::{Format, Toml};
 use opencv::prelude::*;
 use opencv::{core, highgui, imgproc, videoio};
-use std::fs;
+use std::{fs, thread};
 use std::{path::Path, thread::sleep, time::Duration};
 use tch::{CModule, Kind, Tensor};
 
@@ -81,27 +81,27 @@ pub fn cmd_add(config: Config, user: &str) -> Result<()> {
 
     println!("Adding new user: {}", user);
 
-    cam_rgb.grab()?;
-    cam_ir.grab()?;
-
-    sleep(Duration::from_secs(2));
-
-    cam_ir.read(&mut frame_ir)?;
-    cam_rgb.read(&mut frame_rgb)?;
-
     let data_dir = get_data_dir();
     let model = CModule::load(get_data_file(&data_dir, "vggface2.pt")?)?;
 
-    let embedding = process_image(&frame_rgb, &model)?;
-    save_tensor(user, "rgb.bin", &embedding)?;
+    let mut found = false;
+    let mut brightness = 0.0;
 
-    let embedding = process_image(&frame_ir, &model)?;
-    save_tensor(user, "ir.bin", &embedding)?;
+    for _ in 0..5 {
+        cam_ir.read(&mut frame_ir)?;
 
-    let brightness_vec = core::mean(&frame_ir, &core::no_array())?;
-    let brightness = brightness_vec.iter().sum::<f64>() / brightness_vec.len() as f64;
+        let brightness_vec = core::mean(&frame_ir, &core::no_array())?;
+        brightness = brightness_vec.iter().sum::<f64>() / brightness_vec.len() as f64;
 
-    if brightness < config.detection.min_brightness_ir {
+        if brightness < config.detection.min_brightness_ir {
+            continue;
+        } else {
+            let embedding = process_image(&frame_ir, &model)?;
+            save_tensor(user, "ir.bin", &embedding)?;
+            found = true;
+        }
+    }
+    if !found {
         return Err(anyhow!(
             "Failed ir image brightness too low with: {:.2}/{:.2}",
             brightness,
@@ -109,16 +109,31 @@ pub fn cmd_add(config: Config, user: &str) -> Result<()> {
         ));
     }
 
-    let brightness_vec = core::mean(&frame_rgb, &core::no_array())?;
-    let brightness = brightness_vec.iter().sum::<f64>() / brightness_vec.len() as f64;
+    found = false;
 
-    if brightness < config.detection.min_brightness_rgb {
+    for _ in 0..5 {
+        cam_rgb.read(&mut frame_rgb)?;
+
+        let brightness_vec = core::mean(&frame_rgb, &core::no_array())?;
+        brightness = brightness_vec.iter().sum::<f64>() / brightness_vec.len() as f64;
+
+        if brightness < config.detection.min_brightness_rgb {
+            continue;
+        } else {
+            let embedding = process_image(&frame_rgb, &model)?;
+            save_tensor(user, "rgb.bin", &embedding)?;
+            found = true;
+        }
+    }
+
+    if !found {
         return Err(anyhow!(
             "Failed rgb image brightness too low with: {:.2}/{:.2}",
             brightness,
             config.detection.min_brightness_rgb
         ));
     }
+
     println!("Images saved for user: {}", user);
 
     Ok(())
@@ -173,7 +188,7 @@ pub fn cmd_test(config: Config, username: &str) -> Result<()> {
             brightness, similarity, min_similarity
         );
 
-        highgui::imshow("Press <ESC> to exit!", &frame)?;
+        highgui::imshow("Press ESC to exit!", &frame)?;
 
         if brightness < min_brightness {
             println!("Frame too dark!");
@@ -232,15 +247,17 @@ pub fn cmd_auth(username: &str) -> Result<bool> {
 
         if similarity < min_similarity {
             // println!("Face does not match!");
+            thread::sleep(Duration::from_millis(200));
             continue;
         } else if brightness < min_brightness {
             // println!("Frame too dark!");
+            thread::sleep(Duration::from_millis(200));
             continue;
         } else {
             return Ok(true);
         }
     }
 
-    println!("Frame too dark or face not matching!");
+    // println!("Frame too dark or face not matching!");
     Ok(false)
 }
