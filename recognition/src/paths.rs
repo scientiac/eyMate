@@ -30,10 +30,13 @@ pub fn get_data_dir() -> PathBuf {
 pub fn create_data_dir() -> Result<PathBuf> {
     let data_path = get_data_dir();
 
-    if !data_path.exists() {
-        fs::create_dir_all(&data_path)?;
+    let full_path = data_path.join("users");
+
+    if !full_path.exists() {
+        fs::create_dir_all(&full_path)?;
     }
     fs::set_permissions(&data_path, fs::Permissions::from_mode(0o755))?;
+    fs::set_permissions(&full_path, fs::Permissions::from_mode(0o700))?;
 
     Ok(data_path)
 }
