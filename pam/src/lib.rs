@@ -14,7 +14,7 @@ impl PamServiceModule for PamFace {
             Err(e) => return e,
         };
 
-        println!("User: {}", user.to_str().unwrap());
+        // println!("User: {}", user.to_str().unwrap());
 
         let res = cmd_auth(user.to_str().unwrap());
 

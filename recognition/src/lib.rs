@@ -2,7 +2,7 @@ use anyhow::{Result, *};
 use figment::Figment;
 use figment::providers::{Format, Toml};
 use opencv::prelude::*;
-use opencv::{core, highgui, imgcodecs, imgproc, videoio};
+use opencv::{core, highgui, imgproc, videoio};
 use std::fs;
 use std::{path::Path, thread::sleep, time::Duration};
 use tch::{CModule, Kind, Tensor};
@@ -68,13 +68,13 @@ fn save_tensor(username: &str, filename: &str, tensor: &Tensor) -> Result<()> {
 fn load_tensor(username: &str, filename: &str) -> Result<Tensor> {
     let data_dir = get_data_dir().join("users").join(username);
     let path = get_data_file(&data_dir, filename)?;
-    
+
     Ok(tch::Tensor::load(path)?)
 }
 
 pub fn cmd_add(config: Config, user: &str) -> Result<()> {
-    let mut cam_rgb = videoio::VideoCapture::new(config.video.device_rgb, videoio::CAP_ANY)?;
-    let mut cam_ir = videoio::VideoCapture::new(config.video.device_ir, videoio::CAP_ANY)?;
+    let mut cam_rgb = videoio::VideoCapture::new(config.video.device_rgb, videoio::CAP_V4L2)?;
+    let mut cam_ir = videoio::VideoCapture::new(config.video.device_ir, videoio::CAP_V4L2)?;
 
     let mut frame_rgb = Mat::default();
     let mut frame_ir = Mat::default();
@@ -154,7 +154,7 @@ pub fn cmd_test(config: Config, username: &str) -> Result<()> {
     let data_dir = get_data_dir();
     let model = CModule::load(get_data_file(&data_dir, "vggface2.pt")?)?;
 
-    let mut cam = videoio::VideoCapture::new(device, videoio::CAP_ANY)?;
+    let mut cam = videoio::VideoCapture::new(device, videoio::CAP_V4L2)?;
     let mut frame = Mat::default();
 
     let reference_embedding = load_tensor(username, path)?;
@@ -191,11 +191,9 @@ pub fn cmd_auth(username: &str) -> Result<bool> {
 
     let config: Config = Figment::new().merge(Toml::file(config_file)).extract()?;
 
-    let data_dir = get_data_dir().join(username);
-
     let path = match &config.video.mode {
-        Modes::IR => get_data_file(&data_dir, "ir.jpg")?,
-        Modes::RGB => get_data_file(&data_dir, "rgb.jpg")?,
+        Modes::IR => "ir.bin",
+        Modes::RGB => "rgb.bin",
     };
 
     let device = match &config.video.mode {
@@ -216,29 +214,34 @@ pub fn cmd_auth(username: &str) -> Result<bool> {
     let data_dir = get_data_dir();
     let model = CModule::load(get_data_file(&data_dir, "vggface2.pt")?)?;
 
-    let mut cam = videoio::VideoCapture::new(device, videoio::CAP_ANY)?;
+    let mut cam = videoio::VideoCapture::new(device, videoio::CAP_V4L2)?;
     let mut frame = Mat::default();
 
-    cam.read(&mut frame)?;
+    let reference_embedding = load_tensor(username, path)?;
 
-    let reference = imgcodecs::imread(&path, imgcodecs::IMREAD_COLOR)?;
-    let reference_embedding = process_image(&reference, &model)?;
+    for _ in 0..5 {
+        cam.read(&mut frame)?;
 
-    let brightness_vec = core::mean(&frame, &core::no_array())?;
-    let brightness = brightness_vec.iter().sum::<f64>() / brightness_vec.len() as f64;
+        let brightness_vec = core::mean(&frame, &core::no_array())?;
+        let brightness = brightness_vec.iter().sum::<f64>() / brightness_vec.len() as f64;
 
-    let input_embedding = process_image(&frame, &model)?;
+        let input_embedding = process_image(&frame, &model)?;
 
-    let similarity = cosine_similarity(&reference_embedding, &input_embedding);
+        let similarity = cosine_similarity(&reference_embedding, &input_embedding);
 
-    if brightness > min_brightness {
-        println!("Frame too dark!");
-        return Ok(false);
+        // println!("Checking: {}/{} {}/{}", similarity, min_similarity, brightness, min_brightness);
+
+        if similarity < min_similarity {
+            // println!("Face does not match!");
+            continue;
+        } else if brightness < min_brightness {
+            // println!("Frame too dark!");
+            continue;
+        } else {
+            return Ok(true);
+        }
     }
-    if similarity > min_similarity {
-        println!("Face does not match!");
-        return Ok(false);
-    }
 
-    Ok(true)
+    println!("Frame too dark or face not matching!");
+    Ok(false)
 }

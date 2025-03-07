@@ -9,7 +9,7 @@ use recognition::paths::*;
 
 fn main() -> Result<()> {
     if whoami::username() != "root" {
-        // return Err(anyhow!("You need to run eyMate with admin rights!"));
+        return Err(anyhow!("You need to run eyMate with admin rights!"));
     }
 
     create_config_dir()?;

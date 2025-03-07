@@ -3,10 +3,10 @@ use std::{fs, os::unix::fs::PermissionsExt, path::PathBuf};
 
 use crate::config::Config;
 
-// const CONFIG_PATH: &str = "/etc/eyMate/";
-// const DATA_PATH: &str = "/usr/share/eyMate/";
-const CONFIG_PATH: &str = "./config/";
-const DATA_PATH: &str = ".";
+const CONFIG_PATH: &str = "/etc/eyMate/";
+const DATA_PATH: &str = "/usr/share/eyMate/";
+// const CONFIG_PATH: &str = "./config/";
+// const DATA_PATH: &str = ".";
 
 pub fn get_config_dir() -> PathBuf {
     PathBuf::from(CONFIG_PATH)
