@@ -3,8 +3,8 @@ use std::{fs, os::unix::fs::PermissionsExt, path::PathBuf};
 
 use crate::config::Config;
 
-const CONFIG_PATH: &str = "/etc/eyMate/";
-const DATA_PATH: &str = "/usr/share/eyMate/";
+const CONFIG_PATH: &str = "/etc/eymate/";
+const DATA_PATH: &str = "/usr/share/eymate/";
 // const CONFIG_PATH: &str = "./config/";
 // const DATA_PATH: &str = ".";
 

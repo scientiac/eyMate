@@ -1,3 +1,22 @@
+[package]
+name = "eymate"
+authors = ["LDprg"]
+description = "A linux face recognition like Windows Hello or Howdy"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/LDprg/eyMate"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.aur]
+files = [["prebuild/vggface2.pt", "/usr/share/eymate/vggface2.pt"]]
+
+[dependencies]
+whoami = "1.5.2"
+eymate-recognition = { path = "recognition", version = "0.1" }
+clap = "4.5.31"
+anyhow = "1.0.97"
+figment = { version = "0.10.19", features = ["toml"] }
+
 [workspace]
 resolver = "2"
-members = ["cli", "pam", "recognition"]
+members = ["pam", "recognition"]
