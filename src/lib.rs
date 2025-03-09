@@ -10,9 +10,6 @@ use tch::{CModule, Kind, Tensor};
 use crate::config::*;
 use crate::paths::*;
 
-pub mod config;
-pub mod paths;
-
 fn get_data_file(path: &Path, file: &str) -> Result<String> {
     let path = path.join(file);
     let path = path

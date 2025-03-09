@@ -1,12 +1,16 @@
 use anyhow::{Result, *};
 use clap::{Command, arg, value_parser};
-use eymate_recognition::*;
-use eymate_recognition::config::*;
-use eymate_recognition::paths::*;
+use config::Config;
 use figment::{
     Figment,
     providers::{Format, Toml},
 };
+use lib::*;
+use paths::*;
+
+mod config;
+mod lib;
+mod paths;
 
 fn main() -> Result<()> {
     if whoami::username() != "root" {

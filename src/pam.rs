@@ -1,8 +1,12 @@
 #[macro_use]
 extern crate pamsm;
 
+use lib::cmd_auth;
 use pamsm::{Pam, PamError, PamFlags, PamLibExt, PamServiceModule};
-use eymate_recognition::cmd_auth;
+
+mod config;
+mod lib;
+mod paths;
 
 struct PamFace;
 

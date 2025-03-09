@@ -1,3 +1,41 @@
-[workspace]
-resolver = "2"
-members = ["cli", "pam", "recognition"]
+[package]
+name = "eymate"
+authors = ["LDprg"]
+description = "A linux face recognition like Windows Hello or Howdy"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/LDprg/eyMate"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.aur]
+depends = ["python-pytorch", "python-torchvision", "python-gobject"]
+files = [
+    [
+        "prebuild/vggface2.pt",
+        "/usr/share/eymate/vggface2.pt",
+    ],
+    [
+        "target/release/libpam_eymate.so",
+        "/usr/lib/security/libpam_eymate.so",
+    ],
+]
+
+[lib]
+name = "pam_eymate"
+crate-type = ["cdylib"]
+path = "./src/pam.rs"
+
+[[bin]]
+name = "eymate"
+path = "./src/main.rs"
+
+[dependencies]
+whoami = "1.5.2"
+clap = "4.5.31"
+anyhow = "1.0.97"
+figment = { version = "0.10.19", features = ["toml"] }
+opencv = { version = "0.94.2", features = ["clang-runtime"] }
+serde = "1.0.218"
+tch = "0.19.0"
+toml = "0.8.20"
+pamsm = { version = "0.5.5", features = ["libpam"] }
