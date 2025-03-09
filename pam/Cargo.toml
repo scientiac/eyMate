@@ -1,5 +1,7 @@
 [package]
 name = "eymate-pam"
+description = "A linux face recognition like Windows Hello or Howdy"
+repository = "https://github.com/LDprg/eyMate"
 version = "0.1.0"
 edition = "2024"
 
