@@ -23,7 +23,7 @@ files = [
 [lib]
 name = "pam_eymate"
 crate-type = ["cdylib"]
-path = "./src/pam.rs"
+path = "./src/lib.rs"
 
 [[bin]]
 name = "eymate"

@@ -12,6 +12,7 @@ pub fn get_config_dir() -> PathBuf {
     PathBuf::from(CONFIG_PATH)
 }
 
+#[allow(dead_code)]
 pub fn create_config_dir() -> Result<PathBuf> {
     let config_path = get_config_dir();
 
@@ -27,6 +28,7 @@ pub fn get_data_dir() -> PathBuf {
     PathBuf::from(DATA_PATH)
 }
 
+#[allow(dead_code)]
 pub fn create_data_dir() -> Result<PathBuf> {
     let data_path = get_data_dir();
 

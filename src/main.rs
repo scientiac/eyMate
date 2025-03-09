@@ -5,12 +5,12 @@ use figment::{
     Figment,
     providers::{Format, Toml},
 };
-use lib::*;
 use paths::*;
+use recognition::*;
 
 mod config;
-mod lib;
 mod paths;
+mod recognition;
 
 fn main() -> Result<()> {
     if whoami::username() != "root" {
