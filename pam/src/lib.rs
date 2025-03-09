@@ -1,10 +1,8 @@
 #[macro_use]
 extern crate pamsm;
 
-use std::{fs::File, io::Write};
-
 use pamsm::{Pam, PamError, PamFlags, PamLibExt, PamServiceModule};
-use recognition::cmd_auth;
+use eymate_recognition::cmd_auth;
 
 struct PamFace;
 
@@ -22,7 +20,7 @@ fn auth(pamh: Pam) -> PamError {
     if let Err(err) = res {
         panic!("{:?}", err);
 
-        return PamError::AUTH_ERR;
+        // return PamError::AUTH_ERR;
     } else if let Ok(worked) = res {
         if worked {
             return PamError::SUCCESS;

@@ -4,7 +4,7 @@ use figment::providers::{Format, Toml};
 use opencv::prelude::*;
 use opencv::{core, highgui, imgproc, videoio};
 use std::{fs, thread};
-use std::{path::Path, thread::sleep, time::Duration};
+use std::{path::Path, time::Duration};
 use tch::{CModule, Kind, Tensor};
 
 use crate::config::*;
@@ -87,7 +87,7 @@ pub fn cmd_add(config: Config, user: &str) -> Result<()> {
     let mut found = false;
     let mut brightness = 0.0;
 
-    for _ in 0..5 {
+    for _ in 0..config.detection.retries {
         cam_ir.read(&mut frame_ir)?;
 
         let brightness_vec = core::mean(&frame_ir, &core::no_array())?;
@@ -111,7 +111,7 @@ pub fn cmd_add(config: Config, user: &str) -> Result<()> {
 
     found = false;
 
-    for _ in 0..5 {
+    for _ in 0..config.detection.retries {
         cam_rgb.read(&mut frame_rgb)?;
 
         let brightness_vec = core::mean(&frame_rgb, &core::no_array())?;
@@ -233,7 +233,7 @@ pub fn cmd_auth(username: &str) -> Result<bool> {
 
     let reference_embedding = load_tensor(username, path)?;
 
-    for _ in 0..5 {
+    for _ in 0..config.detection.retries {
         cam.read(&mut frame)?;
 
         let brightness_vec = core::mean(&frame, &core::no_array())?;

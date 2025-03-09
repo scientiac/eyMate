@@ -29,6 +29,7 @@ pub struct Detection {
     pub min_similarity_ir: f64,
     pub min_brightness_rgb: f64,
     pub min_brightness_ir: f64,
+    pub retries: u32,
 }
 
 impl Default for Detection {
@@ -38,6 +39,7 @@ impl Default for Detection {
             min_similarity_ir: 0.9,
             min_brightness_rgb: 50.0,
             min_brightness_ir: 25.0,
+            retries: 10,
         }
     }
 }

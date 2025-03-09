@@ -1,11 +1,12 @@
 use anyhow::{Result, *};
 use clap::{Command, arg, value_parser};
+use eymate_recognition::*;
+use eymate_recognition::config::*;
+use eymate_recognition::paths::*;
 use figment::{
     Figment,
     providers::{Format, Toml},
 };
-use recognition::config::*;
-use recognition::paths::*;
 
 fn main() -> Result<()> {
     if whoami::username() != "root" {
@@ -40,10 +41,10 @@ fn main() -> Result<()> {
 
     let err = match matches.subcommand() {
         Some(("add", add_matches)) => {
-            recognition::cmd_add(config, add_matches.get_one::<String>("USER").unwrap())
+            cmd_add(config, add_matches.get_one::<String>("USER").unwrap())
         }
         Some(("test", test_matches)) => {
-            recognition::cmd_test(config, test_matches.get_one::<String>("USER").unwrap())
+            cmd_test(config, test_matches.get_one::<String>("USER").unwrap())
         }
         _ => unreachable!(),
     };
