@@ -1,6 +1,7 @@
 [package]
 name = "eymate-recognition"
 description = "A linux face recognition like Windows Hello or Howdy"
+license = "MIT OR Apache-2.0"
 repository = "https://github.com/LDprg/eyMate"
 version = "0.1.0"
 edition = "2024"
