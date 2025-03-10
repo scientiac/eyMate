@@ -2,7 +2,7 @@ name: Rust
 on:
   pull_request:
   push:
-    branches: ["main"]
+    branches: [main]
 env:
   CARGO_TERM_COLOR: always
   LIBTORCH_USE_PYTORCH: 1
@@ -13,8 +13,6 @@ jobs:
       - uses: actions/checkout@v4
       - uses: Swatinem/rust-cache@v2
       - uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
       - run: pip install torch torchvision
       - run: sudo apt update
       - run: sudo apt install -y libopencv-dev libpam0g-dev
