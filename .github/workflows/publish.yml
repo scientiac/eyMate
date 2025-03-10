@@ -1,21 +1,16 @@
 name: Upload Distro Packages
-
 on:
   release:
-
 jobs:
   release-build:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.x"
       - run: pip install -r requirements.txt
-
       - run: sudo apt install -y pacman-package-manager libopencv-dev libpam0g-dev
-
       - name: Build packages
         run: |
           cargo build --release
@@ -24,20 +19,16 @@ jobs:
           cargo generate-rpm
 
           makepkg -D target/cargo-aur/
-
       - name: Upload packages
         uses: actions/upload-artifact@v4
         with:
           name: eymate.pkg.tar.zst
           path: target/cargo-aur/*.pkg.tar.zst
-
-    
       - name: Upload packages
         uses: actions/upload-artifact@v4
         with:
           name: eymate.deb
           path: target/debian/*.deb
-      
       - name: Upload packages
         uses: actions/upload-artifact@v4
         with:
