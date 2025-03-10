@@ -20,7 +20,7 @@ jobs:
     - uses: BSFishy/pip-action@v1
       with:
         packages: |
-          - torch
-          - torchvision
+          torch
+          torchvision
     - name: Build
       run: cargo build --verbose
