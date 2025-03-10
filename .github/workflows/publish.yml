@@ -28,9 +28,10 @@ jobs:
           cargo aur
           cargo deb
           cargo generate-rpm
-      - name: Make arch
-        working-directory: ./target/cargo-aur
-        run: makepkg
+      - uses: heyhusen/archlinux-package-action@v2
+        with:
+          path: target/cargo-aur
+          flags: '--noconfirm'
       - name: Upload packages
         uses: actions/upload-artifact@v4
         with:
