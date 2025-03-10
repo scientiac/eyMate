@@ -31,6 +31,7 @@ jobs:
       - uses: heyhusen/archlinux-package-action@v2
         with:
           path: target/cargo-aur
+          aur: true
           flags: '--noconfirm'
       - name: Upload packages
         uses: actions/upload-artifact@v4
