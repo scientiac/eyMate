@@ -7,13 +7,15 @@ env:
   CARGO_TERM_COLOR: always
   LIBTORCH_USE_PYTORCH: 1
 jobs:
-  pre-commit:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: Swatinem/rust-cache@v2
+      - uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          packages: libopencv-dev libpam0g-dev
+          version: 1.0
       - uses: actions/setup-python@v5
       - run: pip install torch torchvision
-      - run: sudo apt update
-      - run: sudo apt install -y libopencv-dev libpam0g-dev
       - uses: pre-commit/action@v3.0.1
