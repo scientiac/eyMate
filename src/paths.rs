@@ -38,7 +38,6 @@ pub fn create_data_dir() -> Result<PathBuf> {
         fs::create_dir_all(&full_path)?;
     }
     fs::set_permissions(&data_path, fs::Permissions::from_mode(0o755))?;
-    fs::set_permissions(&full_path, fs::Permissions::from_mode(0o700))?;
 
     Ok(data_path)
 }
