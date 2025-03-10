@@ -1,6 +1,7 @@
-name: Upload Distro Packages
+name: publish
 on:
   release:
+    types: [published]
 jobs:
   release-build:
     runs-on: ubuntu-latest
