@@ -146,23 +146,23 @@ pub fn cmd_test(config: Config, username: &str) -> Result<()> {
     }
 
     let path = match &config.video.mode {
-        Modes::IR => "ir.bin",
-        Modes::RGB => "rgb.bin",
+        Modes::Ir => "ir.bin",
+        Modes::Rgb => "rgb.bin",
     };
 
     let device = match &config.video.mode {
-        Modes::IR => config.video.device_ir,
-        Modes::RGB => config.video.device_rgb,
+        Modes::Ir => config.video.device_ir,
+        Modes::Rgb => config.video.device_rgb,
     };
 
     let min_similarity = match &config.video.mode {
-        Modes::IR => config.detection.min_similarity_ir,
-        Modes::RGB => config.detection.min_similarity_rgb,
+        Modes::Ir => config.detection.min_similarity_ir,
+        Modes::Rgb => config.detection.min_similarity_rgb,
     };
 
     let min_brightness = match &config.video.mode {
-        Modes::IR => config.detection.min_brightness_ir,
-        Modes::RGB => config.detection.min_brightness_rgb,
+        Modes::Ir => config.detection.min_brightness_ir,
+        Modes::Rgb => config.detection.min_brightness_rgb,
     };
 
     let data_dir = get_data_dir();
@@ -206,23 +206,23 @@ pub fn cmd_auth(username: &str) -> Result<bool> {
     let config: Config = Figment::new().merge(Toml::file(config_file)).extract()?;
 
     let path = match &config.video.mode {
-        Modes::IR => "ir.bin",
-        Modes::RGB => "rgb.bin",
+        Modes::Ir => "ir.bin",
+        Modes::Rgb => "rgb.bin",
     };
 
     let device = match &config.video.mode {
-        Modes::IR => config.video.device_ir,
-        Modes::RGB => config.video.device_rgb,
+        Modes::Ir => config.video.device_ir,
+        Modes::Rgb => config.video.device_rgb,
     };
 
     let min_similarity = match &config.video.mode {
-        Modes::IR => config.detection.min_similarity_ir,
-        Modes::RGB => config.detection.min_similarity_rgb,
+        Modes::Ir => config.detection.min_similarity_ir,
+        Modes::Rgb => config.detection.min_similarity_rgb,
     };
 
     let min_brightness = match &config.video.mode {
-        Modes::IR => config.detection.min_brightness_ir,
-        Modes::RGB => config.detection.min_brightness_rgb,
+        Modes::Ir => config.detection.min_brightness_ir,
+        Modes::Rgb => config.detection.min_brightness_rgb,
     };
 
     let data_dir = get_data_dir();

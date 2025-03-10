@@ -1,8 +1,8 @@
 #[macro_use]
 extern crate pamsm;
 
-use recognition::cmd_auth;
 use pamsm::{Pam, PamError, PamFlags, PamLibExt, PamServiceModule};
+use recognition::cmd_auth;
 
 mod config;
 mod paths;

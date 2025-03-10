@@ -2,8 +2,8 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub enum Modes {
-    RGB,
-    IR,
+    Rgb,
+    Ir,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -16,7 +16,7 @@ pub struct Video {
 impl Default for Video {
     fn default() -> Self {
         Self {
-            mode: Modes::IR,
+            mode: Modes::Ir,
             device_rgb: 0,
             device_ir: 2,
         }
