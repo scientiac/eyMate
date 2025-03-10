@@ -17,5 +17,8 @@ jobs:
           packages: libopencv-dev libpam0g-dev
           version: 1.0
       - uses: actions/setup-python@v5
-      - run: pip install torch torchvision
+        with:
+          python-version: '3.13'
+          cache: 'pip'
+      - run: pip install -r requirements.txt
       - run: cargo build --verbose
