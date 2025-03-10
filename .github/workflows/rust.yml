@@ -22,6 +22,6 @@ jobs:
         python-version: '3.13'
     - run: pip install torch torchvision
     - run: sudo apt update
-    - run: sudo apt install -y libopencv-dev
+    - run: sudo apt install -y libopencv-dev libpam0g-dev
     - name: Build
       run: cargo build --verbose
