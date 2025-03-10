@@ -16,6 +16,7 @@ jobs:
         with:
           packages: libopencv-dev libpam0g-dev
           version: 1.0
+          execute_install_scripts: true
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
