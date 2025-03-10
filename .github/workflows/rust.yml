@@ -16,6 +16,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    - run: sudo apt update
     - run: sudo apt install -y libtorch-dev
     - name: Build
       run: cargo build --verbose
