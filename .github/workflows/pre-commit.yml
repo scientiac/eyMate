@@ -14,9 +14,10 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - uses: awalsh128/cache-apt-pkgs-action@latest
         with:
-          packages: libopencv-dev libpam0g-dev
+          packages: libpam0g-dev
           version: 1.0
           execute_install_scripts: true
+      - run: sudo apt install -y libopencv-dev
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
