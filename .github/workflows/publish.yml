@@ -15,7 +15,7 @@ jobs:
         with:
           python-version: "3.x"
       - run: pip install -r requirements.txt
-      - run: sudo apt install -y pacman-package-manager libopencv-dev libpam0g-dev
+      - run: sudo apt install -y makepkg libopencv-dev libpam0g-dev
       - name: Build packages
         run: |
           cargo install cargo-binstall
@@ -29,7 +29,7 @@ jobs:
           cargo deb
           cargo generate-rpm
 
-          makepkg -D target/cargo-aur/
+          makepkg --dir target/cargo-aur/
       - name: Upload packages
         uses: actions/upload-artifact@v4
         with:
