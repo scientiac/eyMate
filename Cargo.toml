@@ -43,12 +43,17 @@ assets = [
 ]
 
 [package.metadata.generate-rpm]
-requires = ["python3-torch", "python3-torchvision", "python3-gobject", "opencv"]
 assets = [
   { source = "target/release/eymate", dest = "/usr/bin/eymate", mode = "755" },
   { source = "prebuild/vggface2.pt", dest = "/usr/share/eymate/vggface2.pt", mode = "755" },
   { source = "target/release/libpam_eymate.so", dest = "/usr/lib/security/libpam_eymate.so", mode = "644" },
 ]
+
+[package.metadata.generate-rpm.requires]
+python3-torch = "*"
+python3-torchvision = "*"
+python3-gobject = "*"
+opencv = "*"
 
 [lib]
 name = "pam_eymate"
