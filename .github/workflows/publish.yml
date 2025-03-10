@@ -17,7 +17,7 @@ jobs:
       - run: sudo apt install -y pacman-package-manager libopencv-dev libpam0g-dev
       - name: Build packages
         run: |
-          cargo install binstall
+          cargo install cargo-binstall
           cargo binstall cargo-aur
           cargo binstall cargo-deb
           cargo binstall cargo-generate-rpm
