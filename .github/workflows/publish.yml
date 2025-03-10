@@ -28,8 +28,9 @@ jobs:
           cargo aur
           cargo deb
           cargo generate-rpm
-
-          makepkg --dir target/cargo-aur/
+      - name: Make arch
+        working-directory: ./target/cargo-aur
+        run: makepkg
       - name: Upload packages
         uses: actions/upload-artifact@v4
         with:
