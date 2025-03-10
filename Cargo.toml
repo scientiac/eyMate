@@ -20,6 +20,29 @@ files = [
     ],
 ]
 
+[package.metadata.deb]
+maintainer = "LDprg"
+copyright = "2025, LDprg"
+license-file = ["LICENSE"]
+depends = "$auto"
+assets = [
+    [
+        "target/release/eymate",
+        "/usr/bin/eymate",
+        "755",
+    ],
+    [
+        "prebuild/vggface2.pt",
+        "/usr/share/eymate/vggface2.pt",
+        "755",
+    ],
+    [
+        "target/release/libpam_eymate.so",
+        "/usr/lib/security/libpam_eymate.so",
+        "755",
+    ],
+]
+
 [lib]
 name = "pam_eymate"
 crate-type = ["cdylib"]
