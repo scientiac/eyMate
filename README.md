@@ -2,6 +2,14 @@
 
 An Linux alternative to Windows facial IR login, similar to Howdy
 
+## How to Install
+
+EyMate provides following package formats:
+
+- pacman
+- rpm
+- dpkg
+
 ## Requirements
 
 You need to have following installed:
