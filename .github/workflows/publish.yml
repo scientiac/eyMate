@@ -21,7 +21,7 @@ jobs:
           cargo install cargo-binstall
           cargo binstall cargo-aur
           cargo binstall cargo-deb
-          cargo binstall cargo-generate-rpm
+          cargo install cargo-generate-rpm --git https://github.com/cat-in-136/cargo-generate-rpm
 
           cargo build --release
 
