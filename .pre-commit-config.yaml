@@ -23,6 +23,10 @@ repos:
       - id: fix-byte-order-marker
       - id: mixed-line-ending
       - id: trailing-whitespace
+  - repo: https://gitlab.com/bmares/check-json5
+    rev: v1.0.0
+    hooks:
+      - id: check-json5
   - repo: https://github.com/ComPWA/taplo-pre-commit
     rev: v0.9.3
     hooks:
