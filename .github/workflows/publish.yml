@@ -37,8 +37,6 @@ jobs:
         with:
           tag_name: ${{ github.ref }}
           release_name: Release ${{ github.ref }} (draft)
-          body: |
-            Test upload-to-github-release works with `actions/create-release`.
           draft: true
           prerelease: false
       - name: Upload packages
@@ -50,7 +48,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          file: "*.tar.gz"
+          file: "target/cargo-aur/*.tar.gz"
           release_id: ${{ steps.create_release.outputs.id }}
           update_release_body: ${{ github.ref }}
           update_release_body_append: "true"
@@ -70,7 +68,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          file: "*.pkg.tar.zst"
+          file: "target/cargo-aur/*.pkg.tar.zst"
           release_id: ${{ steps.create_release.outputs.id }}
           update_release_body: ${{ github.ref }}
           update_release_body_append: "true"
@@ -83,7 +81,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          file: "*.deb"
+          file: "target/debian/*.deb"
           release_id: ${{ steps.create_release.outputs.id }}
           update_release_body: ${{ github.ref }}
           update_release_body_append: "true"
@@ -96,7 +94,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          file: "*.rpm"
+          file: "target/generate-rpm/*.rpm"
           release_id: ${{ steps.create_release.outputs.id }}
           update_release_body: ${{ github.ref }}
           update_release_body_append: "true"
