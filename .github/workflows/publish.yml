@@ -28,7 +28,7 @@ jobs:
           cargo aur
           cargo deb
           cargo generate-rpm
-      - uses: heyhusen/archlinux-package-action@v2
+      - uses: cilki/archlinux-package-action@v2
         with:
           path: target/cargo-aur
           aur: true
