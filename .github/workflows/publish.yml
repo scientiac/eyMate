@@ -1,7 +1,8 @@
 name: publish
 on:
-  release:
-    types: [published]
+  push:
+    tags:
+      - "*"
 env:
   CARGO_TERM_COLOR: always
   LIBTORCH_USE_PYTORCH: 1
@@ -28,6 +29,33 @@ jobs:
           cargo aur
           cargo deb
           cargo generate-rpm
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }} (draft)
+          body: |
+            Test upload-to-github-release works with `actions/create-release`.
+          draft: true
+          prerelease: false
+      - name: Upload packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: eymate.tar.gz
+          path: target/cargo-aur/*.tar.gz
+      - uses: xresloader/upload-to-github-release@main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          file: "*.tar.gz"
+          release_id: ${{ steps.create_release.outputs.id }}
+          update_release_body: ${{ github.ref }}
+          update_release_body_append: "true"
+          overwrite: true
+          verbose: true
       - uses: cilki/archlinux-package-action@main
         with:
           path: target/cargo-aur
@@ -38,13 +66,37 @@ jobs:
         with:
           name: eymate.pkg.tar.zst
           path: target/cargo-aur/*.pkg.tar.zst
+      - uses: xresloader/upload-to-github-release@main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          file: "*.pkg.tar.zst"
+          release_id: ${{ steps.create_release.outputs.id }}
+          update_release_body: ${{ github.ref }}
+          update_release_body_append: "true"
       - name: Upload packages
         uses: actions/upload-artifact@v4
         with:
           name: eymate.deb
           path: target/debian/*.deb
+      - uses: xresloader/upload-to-github-release@main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          file: "*.deb"
+          release_id: ${{ steps.create_release.outputs.id }}
+          update_release_body: ${{ github.ref }}
+          update_release_body_append: "true"
       - name: Upload packages
         uses: actions/upload-artifact@v4
         with:
           name: eymate.rpm
           path: target/generate-rpm/*.rpm
+      - uses: xresloader/upload-to-github-release@main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          file: "*.rpm"
+          release_id: ${{ steps.create_release.outputs.id }}
+          update_release_body: ${{ github.ref }}
+          update_release_body_append: "true"
