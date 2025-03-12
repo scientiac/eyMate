@@ -54,24 +54,23 @@ jobs:
           update_release_body_append: "true"
           overwrite: true
           verbose: true
-      # - uses: cilki/archlinux-package-action@main
-      #   with:
-      #     path: target/cargo-aur
-      #     aur: true
-      #     flags: '--noconfirm'
-      # - name: Upload packages
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: eymate.pkg.tar.zst
-      #     path: target/cargo-aur/*.pkg.tar.zst
-      # - uses: xresloader/upload-to-github-release@main
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   with:
-      #     file: "target/cargo-aur/*.pkg.tar.zst"
-      #     release_id: ${{ steps.create_release.outputs.id }}
-      #     update_release_body: ${{ github.ref }}
-      #     update_release_body_append: "true"
+      - uses: cilki/archlinux-package-action@main
+        with:
+          aur: true
+          flags: '-s --dir target/cargo-aur --noconfirm'
+      - name: Upload packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: eymate.pkg.tar.zst
+          path: target/cargo-aur/*.pkg.tar.zst
+      - uses: xresloader/upload-to-github-release@main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          file: "target/cargo-aur/*.pkg.tar.zst"
+          release_id: ${{ steps.create_release.outputs.id }}
+          update_release_body: ${{ github.ref }}
+          update_release_body_append: "true"
       - name: Upload packages
         uses: actions/upload-artifact@v4
         with:
