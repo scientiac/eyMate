@@ -54,10 +54,11 @@ jobs:
           update_release_body_append: "true"
           overwrite: true
           verbose: true
+      - run: cp target/cargo-aur/* .
       - uses: cilki/archlinux-package-action@main
         with:
           aur: true
-          flags: '-s --dir target/cargo-aur --noconfirm'
+          flags: '-s --noconfirm'
       - name: Upload packages
         uses: actions/upload-artifact@v4
         with:
