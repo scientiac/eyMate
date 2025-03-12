@@ -55,11 +55,12 @@ jobs:
           overwrite: true
           verbose: true
       - run: tar -C target/cargo-aur -xvzf target/cargo-aur/*.tar.gz
+      - run: tar -xvzf target/cargo-aur/*.tar.gz
       - uses: cilki/archlinux-package-action@main
         with:
           path: target/cargo-aur
           aur: true
-          flags: '-s --noextract --noconfirm'
+          flags: '--noextract --nobuild --noconfirm'
       - name: Upload packages
         uses: actions/upload-artifact@v4
         with:
