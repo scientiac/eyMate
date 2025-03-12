@@ -54,6 +54,7 @@ jobs:
           update_release_body_append: "true"
           overwrite: true
           verbose: true
+      - run: tar -C target/cargo-aur -xvzf target/cargo-aur/*.tar.gz
       - uses: cilki/archlinux-package-action@main
         with:
           path: target/cargo-aur
