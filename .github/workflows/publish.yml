@@ -54,7 +54,6 @@ jobs:
           update_release_body_append: "true"
           overwrite: true
           verbose: true
-      - run: tar -C target/cargo-aur -xvzf target/cargo-aur/*.tar.gz
       - run: tar -xvzf target/cargo-aur/*.tar.gz
       - uses: cilki/archlinux-package-action@main
         with:
@@ -65,12 +64,12 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: eymate.pkg.tar.zst
-          path: target/cargo-aur/*.pkg.tar.zst
+          path: "*.pkg.tar.zst"
       - uses: xresloader/upload-to-github-release@main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          file: "target/cargo-aur/*.pkg.tar.zst"
+          file: "*.pkg.tar.zst"
           release_id: ${{ steps.create_release.outputs.id }}
           update_release_body: ${{ github.ref }}
           update_release_body_append: "true"
