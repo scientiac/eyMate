@@ -40,8 +40,8 @@ Alternative download the packages from the github releases.
 Add following to pam config at the top of the file:
 
 ```
-auth 		sufficient 		pam_unix.so  try_first_pass likeauth nullok
-auth 		sufficient 	    libpam_eymate.so
+auth        sufficient      pam_unix.so  try_first_pass likeauth nullok
+auth        sufficient      libpam_eymate.so
 ```
 
 This will cause you login prompt to try face detection whenever you type in a wrong password.
@@ -50,8 +50,8 @@ Just hit enter when you want to use face detection.
 Alternative you could do it the other way around:
 
 ```
-auth 		sufficient 	    libpam_eymate.so
-auth 		sufficient 		pam_unix.so likeauth nullok
+auth        sufficient      libpam_eymate.so
+auth        sufficient      pam_unix.so likeauth nullok
 ```
 
 This will first eyMate to do the auth and if it fails run a normal password login.
