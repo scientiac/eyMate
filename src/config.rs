@@ -36,7 +36,7 @@ impl Default for Detection {
     fn default() -> Self {
         Self {
             min_similarity_rgb: 0.7,
-            min_similarity_ir: 0.9,
+            min_similarity_ir: 0.8,
             min_brightness_rgb: 50.0,
             min_brightness_ir: 10.0,
             retries: 10,
