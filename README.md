@@ -7,6 +7,7 @@ Linux face detection similar to Windows Hello and Howdy written in rust.
 
 > [!WARNING]
 > This project is very much new. It should work, but expect some stuff not to work as expected.
+> IR IS CURRENTLY NOT WORKING CORRECTLY (only normal cam works)
 
 ## How to Install
 
