@@ -12,11 +12,11 @@ jobs:
     steps:
       - run: pacman -Sy
       - run: pacman -S  --noconfirm base-devel nodejs rustup python python-pytorch python-torchvision python-gobject opencv clang dpkg
-      - run: rustup toolchain install nightly
-      - run: rustup default nightly
       - uses: actions/checkout@v4
         with:
           lfs: true
+      - run: rustup toolchain install nightly
+      - run: rustup default nightly
       - uses: Swatinem/rust-cache@v2
         with:
           cache-on-failure: "true"
