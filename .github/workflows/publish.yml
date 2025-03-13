@@ -11,7 +11,7 @@ jobs:
     container: archlinux:latest
     steps:
       - run: pacman -Sy
-      - run: pacman -S  --noconfirm base-devel nodejs rustup python python-pytorch python-torchvision python-gobject opencv clang dpkg git
+      - run: pacman -S  --noconfirm base-devel nodejs rustup python python-pytorch python-torchvision python-gobject opencv clang dpkg git git-lfs
       - uses: actions/checkout@v4
         with:
           lfs: true
