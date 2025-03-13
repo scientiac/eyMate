@@ -2,7 +2,7 @@ name: publish
 on:
   push:
     tags:
-      - "*"
+      - "v*.*.*"
 env:
   CARGO_TERM_COLOR: always
 jobs:
@@ -32,14 +32,16 @@ jobs:
           cargo generate-rpm
       - name: Create Release
         id: create_release
-        uses: actions/create-release@v1
+        uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          name: Release ${{ github.ref }} (draft)
           tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }} (draft)
           draft: true
           prerelease: false
+          generate_release_notes: true
+          preserve_order: false
       - name: Upload packages
         uses: actions/upload-artifact@v4
         with:
