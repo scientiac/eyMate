@@ -5,7 +5,7 @@
 
 Linux face detection similar to Windows Hello and Howdy written in rust.
 
-> [!INFO]
+> [!WARN]
 > This project is very much new. It should work, but expect some stuff not to work as expected.
 
 ## How to Install
