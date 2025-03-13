@@ -78,7 +78,7 @@ You need to have following installed:
 - opencv
 - pam
 
-- facenet (git clone into project root, only for building vgg2face.py)
+- facenet (git clone into project root, only for building vgg2face.pt)
 
 #### Build vgg2face model
 
@@ -86,7 +86,7 @@ Just follow these steps:
 
 - install dependencies
 - run build_model.py
-- copy created model ('vgg2face.py') to '/etc/eymate/'
+- copy created model ('vgg2face.pt') to '/etc/eymate/'
 
 ## How to use
 
