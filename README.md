@@ -5,7 +5,7 @@
 
 Linux face detection similar to Windows Hello and Howdy written in rust.
 
-> [!WARN]
+> [!WARNING]
 > This project is very much new. It should work, but expect some stuff not to work as expected.
 
 ## How to Install
@@ -33,7 +33,7 @@ Alternative download the packages from the github releases.
 > - kde (KDE screenunlock)
 > - polkit-1 (GUI prompts)
 
-> [!WARN]
+> [!WARNING]
 > Adding eyMate login to any display manager (sddm, gdm, etc.) is NOT RECOMMENDED!
 > It will cause bugs (like with kwallet) and will make you system very unsecure!
 
