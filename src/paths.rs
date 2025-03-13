@@ -1,13 +1,22 @@
 use anyhow::Result;
 use std::{fs, os::unix::fs::PermissionsExt, path::PathBuf};
+use walkdir::WalkDir;
 
 use crate::config::Config;
 
 const CONFIG_PATH: &str = "/etc/eymate/";
 const DATA_PATH: &str = "/usr/share/eymate/";
-// const CONFIG_PATH: &str = "./config/";
-// const DATA_PATH: &str = ".";
 
+fn set_permissions_recursively(path: &PathBuf, mode: u32) -> Result<()> {
+    let permissions = fs::Permissions::from_mode(mode);
+
+    for entry in WalkDir::new(path) {
+        let entry = entry?;
+        fs::set_permissions(entry.path(), permissions.clone())?;
+    }
+
+    Ok(())
+}
 pub fn get_config_dir() -> PathBuf {
     PathBuf::from(CONFIG_PATH)
 }
@@ -19,7 +28,8 @@ pub fn create_config_dir() -> Result<PathBuf> {
     if !config_path.exists() {
         fs::create_dir_all(&config_path)?;
     }
-    fs::set_permissions(&config_path, fs::Permissions::from_mode(0o755))?;
+    set_permissions_recursively(&config_path, 0o755)?;
+    // fs::set_permissions(&config_path, fs::Permissions::from_mode(0o755))?;
 
     Ok(config_path)
 }
@@ -37,7 +47,9 @@ pub fn create_data_dir() -> Result<PathBuf> {
     if !full_path.exists() {
         fs::create_dir_all(&full_path)?;
     }
-    fs::set_permissions(&data_path, fs::Permissions::from_mode(0o755))?;
+
+    set_permissions_recursively(&data_path, 0o755)?;
+    // fs::set_permissions(&data_path, fs::Permissions::from_mode(0o755))?;
 
     Ok(data_path)
 }
