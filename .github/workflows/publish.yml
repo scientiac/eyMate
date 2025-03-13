@@ -5,7 +5,6 @@ on:
       - "*"
 env:
   CARGO_TERM_COLOR: always
-  # LIBTORCH_USE_PYTORCH: 1
 jobs:
   release-build:
     runs-on: ubuntu-latest
@@ -19,16 +18,12 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           cache-on-failure: "true"
-      # - uses: actions/setup-python@v5
-      # - run: pip install -r requirements.txt
-      # - run: sudo apt install -y makepkg libopencv-dev libpam0g-dev
       - name: Build packages
         run: |
           cargo install cargo-binstall
           cargo binstall -y --force cargo-aur
           cargo binstall -y --force cargo-deb
           cargo binstall -y --force cargo-generate-rpm
-          # cargo install cargo-generate-rpm --git https://github.com/cat-in-136/cargo-generate-rpm
 
           cargo build --release
 
@@ -39,7 +34,7 @@ jobs:
         id: create_release
         uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref }}
           release_name: Release ${{ github.ref }} (draft)
@@ -60,7 +55,12 @@ jobs:
           update_release_body_append: "true"
           overwrite: true
           verbose: true
-      - run: makepkg -D target/cargo-aur/
+      - name: Makepkg
+        run: |
+          useradd builduser -m
+          passwd -d builduser
+          chmod 777 -R .
+          su builduser -c "makepkg -D target/cargo-aur/"
       - name: Upload packages
         uses: actions/upload-artifact@v4
         with:
