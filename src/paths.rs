@@ -6,9 +6,9 @@ use crate::config::Config;
 
 // For debug builds (cargo build)
 #[cfg(debug_assertions)]
-const CONFIG_PATH: &str = "./config-data/";
+const CONFIG_PATH: &str = "./config/";
 #[cfg(debug_assertions)]
-const DATA_PATH: &str = "./config-data/";
+const DATA_PATH: &str = "./config/";
 
 // For release builds (cargo build --release)
 #[cfg(not(debug_assertions))]
