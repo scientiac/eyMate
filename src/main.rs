@@ -13,6 +13,10 @@ mod paths;
 mod recognition;
 
 fn main() -> Result<()> {
+
+    
+    // Don't check for `cargo build`
+    #[cfg(debug_assertions)]
     if whoami::username() != "root" {
         return Err(anyhow!("You need to run eyMate with admin rights!"));
     }
