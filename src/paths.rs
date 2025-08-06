@@ -4,7 +4,16 @@ use walkdir::WalkDir;
 
 use crate::config::Config;
 
+// For debug builds (cargo build)
+#[cfg(debug_assertions)]
+const CONFIG_PATH: &str = "./config-data/";
+#[cfg(debug_assertions)]
+const DATA_PATH: &str = "./config-data/";
+
+// For release builds (cargo build --release)
+#[cfg(not(debug_assertions))]
 const CONFIG_PATH: &str = "/etc/eymate/";
+#[cfg(not(debug_assertions))]
 const DATA_PATH: &str = "/usr/share/eymate/";
 
 fn set_permissions_recursively(path: &PathBuf, mode: u32) -> Result<()> {

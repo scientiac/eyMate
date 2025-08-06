@@ -1,0 +1,27 @@
+#!/bin/sh
+
+# This script runs the 'eymate' application with sudo permissions,
+# ensuring it can connect to the Wayland display server on Wayland.
+
+# It passes the necessary environment variables for Wayland:
+# QT_QPA_PLATFORM: Tells Qt to use the Wayland platform plugin.
+# WAYLAND_DISPLAY: Specifies the Wayland compositor socket.
+# XDG_RUNTIME_DIR: Points to the directory for user-specific runtime files,
+#                  which is crucial for Wayland communication.
+
+# Ensure these variables are set in your current user environment
+# before running the script. You can check them with:
+# echo $WAYLAND_DISPLAY
+# echo $XDG_RUNTIME_DIR
+
+# Check if any arguments were provided to the script
+if [ "$#" -eq 0 ]; then
+    echo "Usage: $0 <eymate_command> [arguments...]"
+    echo "Example: $0 test my_face"
+    echo "Example: $0 add new_user"
+    exit 1
+fi
+
+# Execute the 'eymate' command with sudo and all passed arguments,
+# ensuring Wayland environment variables are preserved.
+sudo QT_QPA_PLATFORM=wayland WAYLAND_DISPLAY=$WAYLAND_DISPLAY XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR ./target/debug/eymate "$@"

@@ -5,3 +5,5 @@ Cargo.lock
 /facenet_pytorch
 /vggface2.pt
 /users
+config-data
+config-data
